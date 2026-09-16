@@ -47,9 +47,20 @@ services:
     restart: unless-stopped
     volumes:
       - wordpress:/var/www/html
-      - ./back-static-angie-1.conf:/etc/angie/http.d/default.conf:ro
+      - ./back-static-angie.conf:/etc/angie/http.d/default.conf:ro
     networks:
       - app-network
+
+  back-static-angie-2:
+    image: docker.angie.software/angie:latest
+    container_name: back-static-angie-2
+    restart: unless-stopped
+    volumes:
+      - wordpress:/var/www/html
+      - ./back-static-angie.conf:/etc/angie/http.d/default.conf:ro
+    networks:
+      - app-network
+
 
   front-1:
     depends_on:
