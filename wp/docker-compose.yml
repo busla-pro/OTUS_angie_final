@@ -12,11 +12,11 @@ services:
     networks:
       - app-network
 
-  wordpress:
+  back-dynamic-wp-1:
     depends_on:
       - db
     image: wordpress:6.0.1-php8.0-fpm-alpine
-    container_name: wordpress
+    container_name: back-dynamic-wp-1
     restart: unless-stopped
     env_file: .env
     environment:
@@ -29,25 +29,46 @@ services:
     networks:
       - app-network
 
-  webserver:
+  back-dynamic-angie-1:
     depends_on:
-      - wordpress
+      - back-dynamic-wp-1
     image: docker.angie.software/angie:latest
-    container_name: webserver
+    container_name: back-dynamic-angie-1
+    restart: unless-stopped
+    volumes:
+      - ./back-dynamic-angie-1.conf:/etc/angie/http.d/default.conf:ro
+      - wordpress:/var/www/html
+    networks:
+      - app-network
+
+  back-static-angie-1:
+    image: docker.angie.software/angie:latest
+    container_name: back-static-angie-1
+    restart: unless-stopped
+    volumes:
+      - wordpress:/var/www/html
+      - ./back-static-angie-1.conf:/etc/angie/http.d/default.conf:ro
+    networks:
+      - app-network
+
+  front-1:
+    depends_on:
+      - back-dynamic-angie-1
+      - back-static-angie-1
+    image: docker.angie.software/angie:latest
+    container_name: front-1
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443/tcp"
       - "443:443/udp"
     volumes:
-      - wordpress:/var/www/html
-      - ./angie-conf/http_angie.conf:/etc/angie/http.d/default.conf:ro
+      - ./front-1.conf:/etc/angie/http.d/default.conf:ro
       - /var/acme-challenge/:/var/acme-challenge/:ro
       - /etc/letsencrypt/:/etc/letsencrypt/:ro
-      - /var/log/docker.angie/error.log:/var/log/angie/error.log:rw
-      - /var/log/docker.angie/access.log:/var/log/angie/access.log:rw
     networks:
       - app-network
+
 volumes:
   wordpress:
   dbdata:
