@@ -29,6 +29,23 @@ services:
     networks:
       - app-network
 
+  back-dynamic-wp-2:
+    depends_on:
+      - db
+    image: wordpress:6.0.1-php8.0-fpm-alpine
+    container_name: back-dynamic-wp-2
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - WORDPRESS_DB_HOST=db:3306
+      - WORDPRESS_DB_USER=$MYSQL_USER
+      - WORDPRESS_DB_PASSWORD=$MYSQL_PASSWORD
+      - WORDPRESS_DB_NAME=wordpress
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - app-network
+
   back-dynamic-angie-1:
     depends_on:
       - back-dynamic-wp-1
@@ -37,6 +54,18 @@ services:
     restart: unless-stopped
     volumes:
       - ./back-dynamic-angie-1.conf:/etc/angie/http.d/default.conf:ro
+      - wordpress:/var/www/html
+    networks:
+      - app-network
+
+  back-dynamic-angie-2:
+    depends_on:
+      - back-dynamic-wp-2
+    image: docker.angie.software/angie:latest
+    container_name: back-dynamic-angie-2
+    restart: unless-stopped
+    volumes:
+      - ./back-dynamic-angie-2.conf:/etc/angie/http.d/default.conf:ro
       - wordpress:/var/www/html
     networks:
       - app-network
