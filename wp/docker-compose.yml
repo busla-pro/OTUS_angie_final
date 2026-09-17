@@ -106,6 +106,7 @@ services:
       - ./front-1.conf:/etc/angie/http.d/default.conf:ro
       - /var/acme-challenge/:/var/acme-challenge/:ro
       - /etc/letsencrypt/:/etc/letsencrypt/:ro
+      - /var/log/docker.angie/error.log:/var/log/angie/error.log:rw
     networks:
       - app-network
 
